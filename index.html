@@ -5,6 +5,68 @@
 	<title>JS TODO App</title>
 </head>
 <body>
+<div id="app">
+	<ul class="todo-wrapper"></ul>
+</div>
 
+<script>
+	// array or todos
+	// class Todo {
+	// 	constructor(text) {
+	// 		this.text = text;
+	// 		this.completed = false;
+	//      this.favorite = false;
+	//      this.created = new Date.now();
+	// 	}
+	// }
+	const todos = [{
+		text: 'Todo 1',
+		created: new Date(),
+		favorite: false,
+	  status: true
+	}, {
+		text: 'Todo 2',
+	  created: new Date(),
+	  favorite: false,
+	  status: false
+	}]
+	const todoWrapper = document.querySelector('.todo-wrapper')
+
+	// Rendering the list of todos
+	const render = () => {
+		// clear the screen
+	    // rerender all the list items
+	  todos.forEach(todo => {
+		const liDOM = document.createElement('li')
+	    const statusDOM = document.createElement('input')
+	    statusDOM.setAttribute('type', 'checkbox')
+	    statusDOM.setAttribute('id', todo.created)
+	    if (todo.status) {
+			    statusDOM.setAttribute('checked', todo.status)
+	    }
+	    const labelDOM = document.createElement('label')
+	    labelDOM.textContent = todo.text
+	    labelDOM.setAttribute('for', todo.created)
+
+	    const deleteBtnDOM = document.createElement('button')
+	    deleteBtnDOM.innerHTML = '&#128465;'
+
+	    liDOM.appendChild(statusDOM)
+	    liDOM.appendChild(labelDOM)
+	    liDOM.appendChild(deleteBtnDOM)
+
+	    todoWrapper.appendChild(liDOM)
+	  })
+	}
+
+	// Adding to the list of todos
+
+	// Deleting an item from the list
+
+	// Updating an item from the list
+
+
+	render()
+</script>
 </body>
 </html>
