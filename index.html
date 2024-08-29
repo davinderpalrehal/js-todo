@@ -3,70 +3,185 @@
 <head>
 	<meta charset="UTF-8">
 	<title>JS TODO App</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+	      integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+	      crossorigin="anonymous" referrerpolicy="no-referrer"/>
+	<style>
+        body {
+            background: bisque;
+            font-family: sans-serif;
+        }
+
+        #app {
+            max-width: 500px;
+            margin: 2em auto 0;
+            background: white;
+            padding: 20px;
+            border-radius: 1em;
+            box-shadow: 0 0 10px 0 #ccc;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .input-wrapper {
+            display: flex;
+        }
+
+        input[type='text'] {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.5em;
+            border-radius: 50px;
+            border: none;
+            box-shadow: 0 0 5px 0 #ccc;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        #add-todo {
+            border-radius: 50px;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border: none;
+            width: 60px;
+            box-shadow: 0 0 5px 0 #ccc;
+            background: #bbb;
+            color: white;
+            font-size: 2em;
+        }
+
+        #add-todo:hover {
+            background: #aaa;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .todo-wrapper {
+            list-style: none;
+            padding: 0;
+        }
+
+        .todo-wrapper li {
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 0 #aaa;
+            display: flex;
+        }
+
+        .todo-wrapper li:hover {
+            box-shadow: 0 1px 0 cyan;
+            background: #eee;
+        }
+
+        .todo-wrapper li label {
+            width: 100%;
+            cursor: pointer;
+            font-size: 1.4em;
+            padding-left: 1ch;
+        }
+
+        .todo-wrapper li button {
+            border: 2px solid white;
+            color: indianred;
+            font-size: 1.5em;
+            border-radius: 30px;
+            padding: 0;
+            height: 30px;
+            width: 33px;
+            background: white;
+            box-shadow: 0 0 5px 0 #aaa;
+        }
+	</style>
 </head>
 <body>
 <div id="app">
+	<h1>JS Todo App</h1>
+	<div class="input-wrapper">
+		<input type="text" placeholder="Go get pizza" id="todo-input">
+		<button id="add-todo">
+			<i class="fa-solid fa-plus"></i>
+		</button>
+	</div>
 	<ul class="todo-wrapper"></ul>
 </div>
 
 <script>
-	// array or todos
-	// class Todo {
-	// 	constructor(text) {
-	// 		this.text = text;
-	// 		this.completed = false;
-	//      this.favorite = false;
-	//      this.created = new Date.now();
-	// 	}
-	// }
-	const todos = [{
-		text: 'Todo 1',
-		created: new Date(),
-		favorite: false,
-	  status: true
-	}, {
-		text: 'Todo 2',
-	  created: new Date(),
-	  favorite: false,
-	  status: false
-	}]
+	class Todo {
+		constructor (text) {
+			this.text = text
+			this.completed = false
+			this.favorite = false
+			this.created = new Date()
+		}
+	}
+
 	const todoWrapper = document.querySelector('.todo-wrapper')
+
+	const todos = []
+
+	const todosProxy = new Proxy(todos, {
+		set (target, property, value, receiver) {
+			const result = Reflect.set(target, property, value, receiver)
+			render()
+			return result
+		},
+		deleteProperty (target, property) {
+			const result = Reflect.deleteProperty(target, property)
+			render()
+			return result
+		}
+	})
 
 	// Rendering the list of todos
 	const render = () => {
 		// clear the screen
-	    // rerender all the list items
-	  todos.forEach(todo => {
-		const liDOM = document.createElement('li')
-	    const statusDOM = document.createElement('input')
-	    statusDOM.setAttribute('type', 'checkbox')
-	    statusDOM.setAttribute('id', todo.created)
-	    if (todo.status) {
-			    statusDOM.setAttribute('checked', todo.status)
-	    }
-	    const labelDOM = document.createElement('label')
-	    labelDOM.textContent = todo.text
-	    labelDOM.setAttribute('for', todo.created)
+		todoWrapper.innerHTML = ''
+		// rerender all the list items
+		todosProxy.forEach((todo, index) => {
+			const liDOM = document.createElement('li')
+			const statusDOM = document.createElement('input')
+			statusDOM.setAttribute('type', 'checkbox')
+			statusDOM.setAttribute('id', `todo-${index}`)
+			if (todo.completed) {
+				statusDOM.setAttribute('checked', todo.completed)
+			}
+			const labelDOM = document.createElement('label')
+			labelDOM.textContent = todo.text
+			labelDOM.setAttribute('for', `todo-${index}`)
 
-	    const deleteBtnDOM = document.createElement('button')
-	    deleteBtnDOM.innerHTML = '&#128465;'
+			const deleteBtnDOM = document.createElement('button')
+			deleteBtnDOM.innerHTML = '<i class="fa-solid fa-circle-minus"></i>'
+		  deleteBtnDOM.addEventListener('click', (event) => {
+				console.log({ event })
+				deleteTodo(index)
+		  })
 
-	    liDOM.appendChild(statusDOM)
-	    liDOM.appendChild(labelDOM)
-	    liDOM.appendChild(deleteBtnDOM)
+			liDOM.appendChild(statusDOM)
+			liDOM.appendChild(labelDOM)
+			liDOM.appendChild(deleteBtnDOM)
 
-	    todoWrapper.appendChild(liDOM)
-	  })
+			todoWrapper.appendChild(liDOM)
+		})
 	}
 
 	// Adding to the list of todos
+	const addTodo = (text) => {
+		todosProxy.push(new Todo(text))
+	}
 
 	// Deleting an item from the list
+	const deleteTodo = (index) => {
+		if (index > -1 && index < todosProxy.length) {
+			todosProxy.splice(index, 1)
+		}
+	}
 
-	// Updating an item from the list
-
-
-	render()
+	addTodo('Todo 1')
+	addTodo('Todo 2')
 </script>
 </body>
 </html>
